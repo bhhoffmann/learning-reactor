@@ -25,7 +25,8 @@ public class BackgroundProcessingController {
     public Mono<String> process(){
         logger.info("Status before starting processing: {}", status);
 
-        startProcessingInBackground().subscribe();
+        startProcessingInBackground()
+                .subscribe();
 
         return Mono.just("Processing started at server. Starting status: " + status);
     }
