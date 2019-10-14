@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example.reactive</groupId>
-	<artifactId>threads</artifactId>
+	<artifactId>learning-reactor</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>threads</name>
+	<name>learning-reactor</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

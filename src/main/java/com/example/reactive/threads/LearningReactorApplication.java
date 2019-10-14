@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ThreadsApplication {
+public class LearningReactorApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ThreadsApplication.class, args);
+		SpringApplication.run(LearningReactorApplication.class, args);
 	}
 
 }
