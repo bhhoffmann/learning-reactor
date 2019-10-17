@@ -35,7 +35,7 @@ public class BackgroundProcessingController {
         return Mono.just("Processing complete")
                 .doOnNext(it -> logger.info("startProcessingInBackground() started."))
                 .delayElement(Duration.ofSeconds(5))
-                .flatMap(thing -> client.callRemoteService())
+                .flatMap(thing -> client.callRemoteService("fast"))
                 .map(thing -> {
                     status++;
                     logger.info("Completed processing. Status: {}", status);

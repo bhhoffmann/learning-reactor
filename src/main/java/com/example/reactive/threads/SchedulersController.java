@@ -39,7 +39,7 @@ public class SchedulersController {
                     logger.info("Got a list: {}", list);
                     return Integer.toString(list.get(0));
                 })
-                .then(client.callRemoteService())
+                .then(client.callRemoteService("fast"))
                 .map(response -> {
                     logger.info("Response from remote call: {}", response);
                     return response;
