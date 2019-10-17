@@ -1,8 +1,10 @@
-package com.example.reactive.threads;
+package com.example.reactive.threads.controllers;
 
 
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
+
+import com.example.reactive.threads.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
