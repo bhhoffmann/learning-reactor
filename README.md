@@ -7,6 +7,24 @@ with how the original designers intended to use the framework. If this is the ca
 to take advice and corrections. I have also, without shame, stolen a lot of material from different sources
 that might not always be properly referenced.
 
+## Useful resources
+Documentation: https://github.com/reactor/reactor-core/tree/master/docs/asciidoc
+Reference Guide: https://projectreactor.io/docs/core/release/reference/index.html
+Interactive tutorial: https://tech.io/playgrounds/929/reactive-programming-with-reactor-3/Flux
+
+
+Blog posts:
+https://spring.io/search?q=notes+on+reactive+programming
+https://spring.io/blog/2016/07/20/notes-on-reactive-programming-part-iii-a-simple-http-server-application
+
+Reactive Gems
+https://github.com/reactor/reactive-streams-commons/issues/21
+
+Flux sharing: https://www.reactiveprogramming.be/project-reactor-flux-sharing/
+
+https://www.youtube.com/watch?v=zls8ZLry68M&t=292s
+Don't be Homer...: https://www.youtube.com/watch?v=eE5-dhP44dw
+
 ## Project Reactor
 Official reference guide: https://projectreactor.io/docs/core/release/reference:
 

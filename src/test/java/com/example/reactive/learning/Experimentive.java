@@ -25,12 +25,15 @@ public class Experimentive {
             return "completed some blocking stuff.";
         };
 
+        final String hey;
+
         Flux.just("red", "white", "blue")
                 .flatMap(value ->
                         Mono.fromCallable(blockingStuff)
                         .subscribeOn(Schedulers.elastic()))
                 .collect(Result::new, (x, y) -> {
                     logger.info("x: {}, y: {}", x, y);
+                    hey = y;
                 })
                 .doOnNext(thing -> logger.info("doOnNext: {}", thing))
                 .subscribe();
@@ -73,6 +76,7 @@ public class Experimentive {
 
         public void add(String a, String b){
             stufz.add(a);
+            stufz.add(b);
         }
     }
 }
