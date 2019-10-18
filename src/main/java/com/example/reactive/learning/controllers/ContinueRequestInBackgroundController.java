@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,35 +27,23 @@ public class ContinueRequestInBackgroundController {
     @GetMapping("/timeout/continue/{timeout}")
     public Mono<String> timeoutButContinueRequest(@PathVariable Integer timeout) {
 
-        Mono<String> response = client.callRemoteService("slow/5")
-                .doOnNext(r -> logger.debug("Got response from remote client: {}", r));
+        Mono<String> response = client.callRemoteService("slow/5");
 
 
         Mono<String> fallback = Mono.just("fallback")
                 .doOnNext(it -> logger.info("Starting fallback with timeout: {}", timeout))
                 .delayElement(Duration.ofSeconds(timeout))
-                .doOnNext(it -> logger.info("Returning: {}", it));
+                .doOnNext(it -> logger.info("Fallback emitted"));
 
-        return Flux.merge(fallback, response)
-                .publish()
-                .doOnNext(it -> logger.info("merge got element: {}", it))
-                .next();
+        Flux<String> sharedFlux = Flux.merge(response, fallback).share();
 
-        /*
-        return Mono.just("Start processing")
-                .doOnNext(it -> logger.info(it))
-                .flatMap(t -> {
-                    return client.callRemoteService("slow/5");
-                })
-                .timeout(Duration.ofSeconds(3))
-                .onErrorResume(err -> {
-                    if (err instanceof TimeoutException){
-                        logger.info("TimeoutException");
-                    }
-                    return Mono.just("This is a msg from fallback");
-                })
-                .doOnNext(it -> logger.info("Returning: {}", it));
+        Flux.from(sharedFlux)
+                .last()
+                .subscribe(out -> logger.debug("backgroundFlux received: {}", out));
 
-         */
+        Flux<String> result = Flux.from(sharedFlux);
+
+        return result.next().doFinally(e -> logger.debug("Returning to user"));
+
     }
 }
