@@ -1,4 +1,4 @@
-package com.example.reactive.threads.remote;
+package com.example.reactive.learning.remote;
 
 import java.time.Duration;
 import org.slf4j.Logger;

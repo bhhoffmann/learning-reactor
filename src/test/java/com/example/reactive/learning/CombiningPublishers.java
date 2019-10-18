@@ -1,4 +1,4 @@
-package com.example.reactive.threads;
+package com.example.reactive.learning;
 
 import org.junit.After;
 import org.junit.Test;
@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
 import java.time.Duration;
 import java.util.Arrays;
 
-public class CombiningPublishersTest {
+public class CombiningPublishers {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
