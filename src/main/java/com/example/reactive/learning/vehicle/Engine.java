@@ -1,8 +1,5 @@
 package com.example.reactive.learning.vehicle;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class Engine {
 
     private Integer volume;

@@ -20,11 +20,14 @@ public class BasicReactor {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Test
-    public void nothingHappensUntilYouSubscribe(){
+    public void nothingHappensUntilYouSubscribe() throws InterruptedException {
 
         Flux.range(1, 10)
                 .delayElements(Duration.ofMillis(100))
-                .doOnNext(it -> logger.debug("Got elem from flux: {}", it));
+                .doOnNext(it -> logger.debug("Got elem from flux: {}", it))
+                .then(Mono.just("ny sekvens"));
+
+        Thread.sleep(3000);
 
     }
 
@@ -34,6 +37,10 @@ public class BasicReactor {
         Flux.range(1, 10)
                 .delayElements(Duration.ofMillis(100))
                 .doOnNext(it -> logger.debug("Got elem from flux: {}", it))
+                .doOnComplete(() -> {
+                    logger.debug("Flux complete");
+                })
+                .then(Mono.just("Ny sekvens"))
                 .subscribe(elem -> logger.info("Subscribe received: {}", elem));
 
         Thread.sleep(3000);
@@ -41,17 +48,18 @@ public class BasicReactor {
     }
 
     @Test
-    public void assemblyVsExecution() {
+    public void assemblyVsExecution() throws InterruptedException {
 
         logger.debug("This is in the assembly phase, and will be logged first.");
 
-        Flux.range(1, 3)
+        Flux.range(1, 6)
                 .delayElements(Duration.ofMillis(10))
                 .subscribe(elem -> logger.info("Got elem from flux: {}", elem));
 
         logger.debug("This is also in the assembly phase, and will be logged second.");
         logger.debug("This is the last log statment, since the application exits before the pipeline is executed.");
 
+        Thread.sleep(3000);
     }
 
     @Test
@@ -65,7 +73,7 @@ public class BasicReactor {
                     logger.debug("Got an element from the flux. Counting down the latch.");
                     countDownLatch.countDown();
                 })
-                .subscribe(elem -> logger.info("Got elem from flux: {}", elem));
+                .blockLast();//subscribe(elem -> logger.info("Got elem from flux: {}", elem));
 
         logger.debug("This is also in the assembly phase, and will be logged second.");
         logger.debug("Since we have a countDownLatch that awaits countdown the program will not exit" +
@@ -180,6 +188,26 @@ public class BasicReactor {
         } else {
             return Mono.just(new Wheel("Continental", 70, 30));
         }
+    }
+
+
+    @Test
+    public void subscribing() throws InterruptedException {
+
+        Mono.just("Print this text")
+                .map(text -> {
+                    Flux.range(1, 3)
+                            .delayElements(Duration.ofMillis(500))
+                            .doOnComplete(() -> {
+                                logger.debug("Flux completed");
+                            })
+                            .subscribe(elem -> logger.debug("From flux: {}", elem));
+
+                    return text;
+                })
+                .subscribe(elem -> logger.debug("From mono: {}", elem));
+
+        Thread.sleep(5000);
     }
 
 }

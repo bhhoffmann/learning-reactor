@@ -1,10 +1,7 @@
 package com.example.reactive.learning.vehicle;
 
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 
-@Component
 public class Car {
 
     private Chassis chassis;
