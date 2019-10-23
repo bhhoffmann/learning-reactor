@@ -26,7 +26,7 @@ public class Client {
 
     public Mono<String> callRemoteService(String endpoint){
         return webClient.get()
-                .uri("http://localhost:8082/remote/" + endpoint)
+                .uri("http://localhost:8083/remote/" + endpoint)
                 .retrieve()
                 .bodyToMono(String.class)
                 .timeout(Duration.ofSeconds(10))

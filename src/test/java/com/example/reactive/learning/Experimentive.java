@@ -33,7 +33,6 @@ public class Experimentive {
                         .subscribeOn(Schedulers.elastic()))
                 .collect(Result::new, (x, y) -> {
                     logger.info("x: {}, y: {}", x, y);
-                    hey = y;
                 })
                 .doOnNext(thing -> logger.info("doOnNext: {}", thing))
                 .subscribe();
