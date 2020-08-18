@@ -1,9 +1,9 @@
 package com.example.reactive.learning;
 
-import com.example.reactive.learning.vehicle.Car;
-import com.example.reactive.learning.vehicle.Chassis;
-import com.example.reactive.learning.vehicle.Engine;
-import com.example.reactive.learning.vehicle.Wheel;
+import com.example.reactive.learning.model.vehicle.Car;
+import com.example.reactive.learning.model.vehicle.Chassis;
+import com.example.reactive.learning.model.vehicle.Engine;
+import com.example.reactive.learning.model.vehicle.Wheel;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +73,7 @@ public class BasicReactor {
                     logger.debug("Got an element from the flux. Counting down the latch.");
                     countDownLatch.countDown();
                 })
-                .blockLast();//subscribe(elem -> logger.info("Got elem from flux: {}", elem));
+                .subscribe(elem -> logger.info("Got elem from flux: {}", elem));
 
         logger.debug("This is also in the assembly phase, and will be logged second.");
         logger.debug("Since we have a countDownLatch that awaits countdown the program will not exit" +

@@ -1,8 +1,11 @@
 package com.example.reactive.learning;
 
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class UsingEmpty {
@@ -47,6 +50,7 @@ public class UsingEmpty {
 
         private String color;
         private int size;
+        private String shape;
 
         public Balloon() {
         }
@@ -54,6 +58,13 @@ public class UsingEmpty {
         public Balloon(String color, int size) {
             this.color = color;
             this.size = size;
+            shape = null;
+        }
+
+        public Balloon(String color, int size, String shape) {
+            this.color = color;
+            this.size = size;
+            this.shape = shape;
         }
 
         public String getColor() {
@@ -71,6 +82,54 @@ public class UsingEmpty {
         public void setSize(int size) {
             this.size = size;
         }
+
+        public String getShape() {
+            return shape;
+        }
+    }
+
+    @Test
+    public void t() {
+        Mono.just(1)
+            .filter(nr -> nr == 2)
+            .thenReturn(5)
+            .doOnNext(thing -> logger.info("Got a thing: {}", thing))
+            .block();
+
+        Balloon b1 = new Balloon("red", 1);
+        Balloon b2 = new Balloon("blue", 2);
+        Balloon b3 = new Balloon("blue", 2, "round");
+        List<Balloon> bList = List.of(b1,b2,b3);
+
+        Flux.fromIterable(bList)
+            .doOnNext(b -> logger.info("Balloon with size {}", b.getSize()))
+            .filter(b -> b.getSize() == 2)
+            .doOnNext(b -> logger.info("B passed through size filter"))
+            .filter(b -> b.getShape() != null)
+            .doOnNext(b -> logger.info("B passed through null filter"))
+            .map(b -> b.getShape())
+            .doOnNext(thing -> logger.info("Shape: {}", thing))
+            .next()
+            .thenReturn("A")
+            .doOnNext(res -> logger.info("Got result: {}", res))
+            .block();
+
+    }
+
+    @Test
+    public void emptyInZip() {
+
+        Mono<String> e = Mono.empty();
+        Mono<String> v = Mono.just("Hello");
+
+        Mono.zip(e, v)
+            .doOnNext(tuple -> logger.info("Got a zipped mono with T1: {}, T2: {}", tuple.getT1(), tuple.getT2()))
+            .map(tuple -> tuple.getT1() + tuple.getT2())
+            .defaultIfEmpty("Default if empty")
+            .doOnNext(result -> logger.info("Finally got: {}", result))
+            .block();
+
+
     }
 
 }

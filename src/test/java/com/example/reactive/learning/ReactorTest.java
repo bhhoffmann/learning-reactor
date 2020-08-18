@@ -1,5 +1,6 @@
 package com.example.reactive.learning;
 
+import java.time.Duration;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -60,9 +61,7 @@ public class ReactorTest {
     public void fluxCreate(){
         var numberList = Arrays.asList(1, 2, 3, 4, 5);
         Flux.create(emitter -> {
-            numberList.forEach(number -> {
-                emitter.next(number);
-            });
+            numberList.forEach(emitter::next);
         }).subscribe(n -> System.out.println(n));
     }
 
@@ -305,5 +304,20 @@ public class ReactorTest {
         System.out.println(operation + " -- " + el + " -- " +
                 Thread.currentThread().getName());
         return el;
+    }
+
+    @Test
+    public void throttleFlux() {
+        List<String> data = Arrays.asList("A", "B", "C");
+
+        Flux<String> dataFlux = Flux.fromIterable(data)
+            .doOnNext(elem -> logger.info("Data flux emitted {}", elem));
+        Flux<Integer> timer = Flux.range(1, 10).delayElements(Duration.ofSeconds(1))
+            .doOnNext(elem -> logger.info("Timer flux emitted {}", elem));
+
+        dataFlux
+            .zipWith(timer)
+            .doOnNext(t -> logger.info("Zipped flux emitted data {}", t.getT1()))
+            .blockLast();
     }
 }

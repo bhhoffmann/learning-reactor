@@ -1,4 +1,4 @@
-package com.example.reactive.learning.vehicle;
+package com.example.reactive.learning.model.vehicle;
 
 public class Engine {
 
