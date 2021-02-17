@@ -6,7 +6,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -90,6 +92,29 @@ public class Expand {
         } else {
             return Mono.empty();
         }
+    }
+
+
+    @Test
+    void breakByLoopCount() {
+        List<Integer> nrs = Arrays.asList(1, 2, 3, 4);
+        Map<Integer, Integer> cnt = new HashMap<>();
+
+        Mono.just(1)
+            .expand(nr -> {
+                cnt.compute(nr, (k, v) -> (v == null) ? 1 : v + 1);
+                System.out.println(cnt);
+                if(nr < 0) {
+                    return Mono.empty();
+                } else if(cnt.getOrDefault(nr, 0) > 2) {
+                    throw new RuntimeException("INFINITE LOOP");
+                } else {
+                    return Mono.just(1);
+                }
+            })
+            .doOnNext(nr -> System.out.println("THING: " + nr))
+            .blockLast();
+
     }
 
 }
