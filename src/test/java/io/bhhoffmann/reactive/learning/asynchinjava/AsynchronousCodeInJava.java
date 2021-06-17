@@ -39,10 +39,8 @@ class AsynchronousCodeInJava {
     ) {
         Path path = Path.of(filepath);
         Future<Integer> status = null;
-        try {
-            status = AsynchronousFileChannel
-                .open(path, StandardOpenOption.READ)
-                .read(buffer, 0);
+        try (AsynchronousFileChannel asyncChannel = AsynchronousFileChannel.open(path, StandardOpenOption.READ)) {
+            status = asyncChannel.read(buffer, 0);
         } catch (IOException e) {
             logger.warn("Failed to read file with path: {}. Exception message: {}", path, e.getMessage());
         }
@@ -71,7 +69,7 @@ class AsynchronousCodeInJava {
     }
 
     @Test
-    void synchronousBlocking() {
+    void synchronousBlockingIO() {
         logger.info("Doing something...");
         logger.info("Start blocking IO operation");
         String fileContent = readFileBlocking("src/main/resources/the-road-not-taken.txt");
@@ -81,7 +79,7 @@ class AsynchronousCodeInJava {
     }
 
     @Test
-    void asynchronousNonBlocking() throws InterruptedException {
+    void asynchronousNonBlockingIOWithCallback() throws InterruptedException {
         logger.info("Doing something...");
         logger.info("Start non-blocking IO operation");
         ByteBuffer buffer = ByteBuffer.allocate(1048576);
@@ -106,8 +104,29 @@ class AsynchronousCodeInJava {
         );
         logger.info("Doing something else...");
 
-        //Sleep to wait for aync code to finish
+        //Sleep to wait for async code to finish
         Thread.sleep(1000);
+    }
+
+    @Test
+    void asynchronousNonBlockingIOWithFuture() throws InterruptedException {
+        logger.info("Doing something...");
+        logger.info("Start non-blocking IO operation");
+        ByteBuffer buffer = ByteBuffer.allocate(1048576);
+        Future<Integer> ioStatus = readFileNonBlocking(
+            "src/main/resources/the-road-not-taken.txt",
+            buffer
+        );
+        logger.info("Doing something else...");
+
+        //Loop on the status to wait until the async IO is ready
+        while (!ioStatus.isDone()) {
+            logger.info("File read not complete");
+        }
+        logger.info("IO operation complete");
+        buffer.flip();
+        String fileContent = new String(buffer.array()).trim();
+        logger.info("File content:\n{}", fileContent);
     }
 
     @Test
