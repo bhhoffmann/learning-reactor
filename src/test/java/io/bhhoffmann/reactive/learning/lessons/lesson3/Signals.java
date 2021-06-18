@@ -86,7 +86,7 @@ class Signals {
     }
 
     @Test
-    void sideEffectsBasedOnSignals() {
+    void exampleOfSideEffectOperators() {
         Mono.just("Hello")
             .doOnNext(e -> logger.info("Logging the element like this is a side effect. Element: {}", e))
             .subscribe();
