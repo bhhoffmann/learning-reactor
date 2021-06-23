@@ -1,4 +1,4 @@
-# Assembly vs execution phase
+# 2 - Assembly vs execution phase
 
 In the first lesson we saw that nothing happened until we subscribed. This is because Project Reactor works in phases:
 

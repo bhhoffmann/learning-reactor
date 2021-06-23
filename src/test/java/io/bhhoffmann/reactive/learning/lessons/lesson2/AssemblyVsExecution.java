@@ -1,6 +1,5 @@
 package io.bhhoffmann.reactive.learning.lessons.lesson2;
 
-import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +41,6 @@ class AssemblyVsExecution {
 
     @Test
     void assemblyHappensBeforeExecution() throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
         logger.info("--- START ASSEMBLY ---");
         String startValue = "Let's go!";
         Mono<String> sequence = Mono
@@ -58,15 +55,45 @@ class AssemblyVsExecution {
                 logger.info("Executing .map()");
                 return reverse(s);
             })
-            .then(world())
-            .doOnNext(e -> countDownLatch.countDown());
+            .then(world());
 
         logger.info("--- START EXECUTION ---");
         sequence.subscribe();
+    }
 
-        logger.info("Waiting for latch");
-        countDownLatch.await();
-        logger.info("Complete");
+    private static int divideTenBy(int i) {
+        if(i == 0) {
+            throw new RuntimeException("Can't divide a number by 0");
+        }
+        return 10 / i;
+    }
+
+    private static Mono<String> sequenceThatThrowsExceptionDuringAssembly(int i) {
+        int res = divideTenBy(i);
+        if(res < 0) {
+            return Mono.just("negative");
+        } else {
+            return Mono.just("positive");
+        }
+    }
+
+    @Test
+    void assemblyPhasePitfall() {
+        logger.info("--- START ASSEMBLY ---");
+        Mono<String> sequence = Mono.fromCallable(() -> "Hello")
+            .then(sequenceThatThrowsExceptionDuringAssembly(0))
+            //The error handling below will not work, since exception is thrown during assembly of this sequence
+            //not during execution. If you want to fix this you either have to handle the error during assembly
+            //(e.g. with try-catch) or make sure that the code that can throw an exception is run during
+            //execution phase instead (e.g. using flatMap instead of then, or putting divideTenBy inside the sequence
+            //with a fromCallable etc.)
+            .onErrorResume(err -> {
+                logger.info("Caught error. Message: {}", err.getMessage());
+                return Mono.just("Fallback");
+            });
+
+        logger.info("--- START EXECUTION ---");
+        sequence.subscribe();
     }
 
 }

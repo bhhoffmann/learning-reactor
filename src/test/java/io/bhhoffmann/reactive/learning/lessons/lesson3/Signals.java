@@ -41,7 +41,7 @@ class Signals {
     void completeSignalsCanBeHandledByCompleteOperators() {
         Flux<Integer> sequence = Flux.range(1, 10)
             .log() //We do nothing with the elements from the first range, only log the signals
-            .thenMany(Flux.range(11, 20))
+            .thenMany(Flux.range(11, 20)) //thenMany instead of then since we have a Flux (many elements)
             .doOnNext(element -> logger.debug("Got elem from flux: {}", element)); //We print the second range
 
         sequence.subscribe();

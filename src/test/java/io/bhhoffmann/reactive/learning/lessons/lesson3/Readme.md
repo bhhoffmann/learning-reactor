@@ -1,4 +1,4 @@
-# Signals
+# 3 - Signals
 
 Signals are used to control the flow of data in a sequence. These signals are what enables some of the more advanced
 reactive capabilities of Project Reactor (remember, it is called reactive programming) like backpressure, but we won't

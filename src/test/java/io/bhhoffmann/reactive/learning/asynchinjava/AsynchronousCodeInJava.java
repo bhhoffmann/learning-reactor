@@ -1,64 +1,21 @@
 package io.bhhoffmann.reactive.learning.asynchinjava;
 
-import java.io.IOException;
+import io.bhhoffmann.reactive.learning.async.FileHandler;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 class AsynchronousCodeInJava {
 
     private static final Logger logger = LoggerFactory.getLogger(AsynchronousCodeInJava.class);
 
     private static final Integer ITERATIONS = 100_000;
-
-    private static String readFileBlocking(String classpath) {
-        List<String> fileLines = new ArrayList<>();
-
-        Path path = Path.of(classpath);
-        try {
-            fileLines = Files.readAllLines(path);
-        } catch (IOException e) {
-            logger.warn("Failed to read file with path: {}. Exception message: {}", path, e.getMessage());
-        }
-        return String.join("\n", fileLines);
-    }
-
-    private static Future<Integer> readFileNonBlocking(
-        String filepath,
-        ByteBuffer buffer
-    ) {
-        Path path = Path.of(filepath);
-        Future<Integer> status = null;
-        try (AsynchronousFileChannel asyncChannel = AsynchronousFileChannel.open(path, StandardOpenOption.READ)) {
-            status = asyncChannel.read(buffer, 0);
-        } catch (IOException e) {
-            logger.warn("Failed to read file with path: {}. Exception message: {}", path, e.getMessage());
-        }
-        return status;
-    }
-
-    private static void readFileNonBlocking(
-        String filepath,
-        ByteBuffer buffer,
-        CompletionHandler<Integer, ByteBuffer> callback
-    ) {
-        Path path = Path.of(filepath);
-        try (AsynchronousFileChannel asyncChannel = AsynchronousFileChannel.open(path, StandardOpenOption.READ)) {
-            asyncChannel.read(buffer, 0, buffer, callback);
-        } catch (IOException e) {
-            logger.warn("Failed to read file with path: {}. Exception message: {}", path, e.getMessage());
-        }
-    }
 
     private static int simulateProcessingSomething() {
         int sum = 0;
@@ -72,7 +29,7 @@ class AsynchronousCodeInJava {
     void synchronousBlockingIO() {
         logger.info("Doing something...");
         logger.info("Start blocking IO operation");
-        String fileContent = readFileBlocking("src/main/resources/the-road-not-taken.txt");
+        String fileContent = FileHandler.readFileBlocking("src/main/resources/the-road-not-taken.txt");
         logger.info("IO operation complete");
         logger.info("File content:\n{}", fileContent);
         logger.info("Doing something else...");
@@ -83,7 +40,7 @@ class AsynchronousCodeInJava {
         logger.info("Doing something...");
         logger.info("Start non-blocking IO operation");
         ByteBuffer buffer = ByteBuffer.allocate(1048576);
-        readFileNonBlocking(
+        FileHandler.readFileNonBlockingCallback(
             "src/main/resources/the-road-not-taken.txt",
             buffer,
             new CompletionHandler<>() {
@@ -113,7 +70,7 @@ class AsynchronousCodeInJava {
         logger.info("Doing something...");
         logger.info("Start non-blocking IO operation");
         ByteBuffer buffer = ByteBuffer.allocate(1048576);
-        Future<Integer> ioStatus = readFileNonBlocking(
+        Future<Integer> ioStatus = FileHandler.readFileNonBlockingFuture(
             "src/main/resources/the-road-not-taken.txt",
             buffer
         );
@@ -130,6 +87,63 @@ class AsynchronousCodeInJava {
     }
 
     @Test
+    void asynchronousNonBlockingIOWithCompletableFuture() throws InterruptedException, ExecutionException {
+        logger.info("Doing something...");
+
+        logger.info("Start non-blocking IO operation");
+        CompletableFuture<ByteBuffer> completableFuture = FileHandler
+            .readFileNonBlockingCompletableFuture("src/main/resources/the-road-not-taken.txt");
+
+        logger.info("Doing something else...");
+
+        ByteBuffer buffer = completableFuture.get();
+        logger.info("IO operation complete");
+        buffer.flip();
+        String fileContent = new String(buffer.array()).trim();
+        logger.info("File content:\n{}", fileContent);
+    }
+
+    @Test
+    void asynchronousNonBlockingIOWithCompletableFutureConvertedToMono() throws InterruptedException {
+        logger.info("Doing something...");
+
+        logger.info("Assembling mono that contains IO operation");
+        Mono<String> sequence = FileHandler
+            .readFileNonBlockingConvertCompletableFutureToMono("src/main/resources/the-road-not-taken.txt")
+            .doOnNext(fileContent -> {
+                logger.info("IO operation complete");
+                logger.info("File content:\n{}", fileContent);
+            });
+
+        logger.info("Start execution of Mono");
+        sequence.subscribe();
+
+        logger.info("Doing something else...");
+
+        Thread.sleep(1000);
+    }
+
+    @Test
+    void asynchronousNonBlockingIOWithCallbackConvertedToMono() throws InterruptedException {
+        logger.info("Doing something...");
+
+        logger.info("Assembling mono that contains IO operation");
+        Mono<String> sequence = FileHandler
+            .readFileNonBlockingConvertCallbackToMono("src/main/resources/the-road-not-taken.txt")
+            .doOnNext(fileContent -> {
+                logger.info("IO operation complete");
+                logger.info("File content:\n{}", fileContent);
+            });
+
+        logger.info("Start execution of Mono");
+        sequence.subscribe();
+
+        logger.info("Doing something else...");
+
+        Thread.sleep(1000);
+    }
+
+    @Test
     void exampleBlockingCode() {
         long executionStart = System.nanoTime();
 
@@ -143,7 +157,7 @@ class AsynchronousCodeInJava {
 
         //Do some IO
         startTime = System.nanoTime();
-        String fileContent = readFileBlocking("src/main/resources/lorem-ipsum.txt");
+        String fileContent = FileHandler.readFileBlocking("src/main/resources/lorem-ipsum.txt");
         long ioTime = System.nanoTime() - startTime;
 
         //Simulate doing some processing again
@@ -178,7 +192,7 @@ class AsynchronousCodeInJava {
         //Do some IO
         ByteBuffer buffer = ByteBuffer.allocate(1048576);
         long ioStartTime = System.nanoTime();
-        Future<Integer> ioStatus = readFileNonBlocking("src/main/resources/lorem-ipsum.txt", buffer);
+        Future<Integer> ioStatus = FileHandler.readFileNonBlockingFuture("src/main/resources/lorem-ipsum.txt", buffer);
         long ioTimeToStart = System.nanoTime() - ioStartTime;
 
         //Do something else while the IO is done in the background
@@ -208,12 +222,6 @@ class AsynchronousCodeInJava {
             secondProcessingTime / 1000,
             ioTimeToComplete / 1000,
             totalExecutionTime / 1000);
-    }
-
-    @Test
-    void readFileSynchronousBlocking() {
-        String fileContent = readFileBlocking("src/main/resources/the-road-not-taken.txt");
-        logger.info("Content read from file: \n{}", fileContent);
     }
 
 }
