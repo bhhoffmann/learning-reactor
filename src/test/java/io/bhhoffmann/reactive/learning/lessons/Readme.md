@@ -6,14 +6,14 @@ the code and the concepts it tries to demonstrate. Most of the examples use log 
 
 ## Definitions
 
-- Sequence = A Mono or Flux
-- Operator = A method on Mono or Flux
+- Sequence = A Mono or Flux, often with many chained operators (Mono.just("start").map(s -> s.toUpperCase())...)
+- Operator = A method on Mono or Flux, like Mono.map()
 
 ## Similarities between Project Reactor and other things in the Java world
 
 The Mono and Flux objects that form the base of Project Reactor can in many ways be compared to Java's
 CompletableFuture, just with many more methods (operators), enabling you to write almost all your code by chaining these
-methods (which is also what gives rise to the functional style of programming).
+methods (which is also what gives rise to the functional programming style).
 
 With all its additional methods Project Reactor also resembles the Java Stream API, with .filter(), .collect(), .map(),
 etc.
