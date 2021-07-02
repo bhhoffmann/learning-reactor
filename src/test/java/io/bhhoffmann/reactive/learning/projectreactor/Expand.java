@@ -21,6 +21,65 @@ class Expand {
     private static final Logger logger = LoggerFactory.getLogger(Expand.class);
 
     @Test
+    void imperativeVersion() {
+        boolean loop = true;
+        String result = "start";
+        List<String> listWithResults = new ArrayList<>();
+        while (loop) {
+            result = doSomething(result);
+            listWithResults.add(result);
+            logger.info("result={}", result);
+            if (result.equals("Blue")) {
+                logger.info("Got the result that breaks the loop.");
+                loop = false;
+            }
+        }
+        logger.info("List of all results: {}", listWithResults);
+        // Do something more with the list of results
+    }
+
+    private String doSomething(String input) {
+        List<String> data = Arrays.asList("Green", "Yellow", "Blue", "Red");
+        int index = data.indexOf(input);
+        if (index == -1) {
+            index = 0;
+        } else if (index < 3) {
+            index = index + 1;
+        }
+        return data.get(index);
+    }
+
+    @Test
+    void expandVersion() {
+        doSomethingMono("start")
+            .expand(result -> {
+                if (result.equals("Blue")) {
+                    logger.info("Got the result that breaks the loop.");
+                    return Mono.empty();
+                } else {
+                    return doSomethingMono(result);
+                }
+            })
+            // Each result is emitted here
+            .doOnNext(result -> logger.info("result={}", result))
+            .collectList() // You do not have to collect it as a list unless you need all the elements in a list
+            .doOnNext(listWithResults -> logger.info("List of all results: {}", listWithResults))
+            // Do something more with the list of results
+            .subscribe();
+    }
+
+    private Mono<String> doSomethingMono(String input) {
+        List<String> data = Arrays.asList("Green", "Yellow", "Blue", "Red");
+        int index = data.indexOf(input);
+        if (index == -1) {
+            index = 0;
+        } else if (index < 3) {
+            index++;
+        }
+        return Mono.just(data.get(index));
+    }
+
+    @Test
     void expand() {
 
         List<String> names = Arrays.asList("James", "Sophie", "Carl");
