@@ -21,14 +21,30 @@
 
 	<dependencies>
 
-		<dependency>
+		<!-->
+			Uncomment the dependency below to convert the application to Spring MVC.
+			By having both spring-boot-starter-web and spring-boot-starter-webflux the application will be
+			Spring MVC, but you are able to use the reactive HTTP client -> WebClient
+			PS: The security config in this project is not compatible with Spring MVC
+		<-->
+		<!--dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+		</dependency-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

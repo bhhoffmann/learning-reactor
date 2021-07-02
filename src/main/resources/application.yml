@@ -3,5 +3,10 @@ server:
 
 logging:
   level:
-    com: INFO
-    reactor: INFO
+    org.springframework:
+      web.reactive: INFO #DEBUG for web reactive logging
+      web.reactive.function.client.ExchangeFunctions: INFO #DEBUG for logging WebClient requests
+
+basic-auth:
+  #helloworld - encrypted using Bcrypt
+  admin-password: "{bcrypt}$2a$10$/Djv1Ternoa7ipSYG1sRAOpcv3qWk/acVMCtJHNy9bON/PoaHNWFO"
